@@ -27,7 +27,8 @@ public class App {
                 break;
 
                 case 2:
-                    app.adicionarDependente();
+                    String adicionarDependentes = app.adicionarDependente();
+                    JOptionPane.showMessageDialog(null,adicionarDependentes);
                 break;
 
                 case 3:
@@ -35,11 +36,13 @@ public class App {
                 break;
 
                 case 4:
-                    app.exibirDependentes();
+                    String exibirDependentes = app.exibirDependentes();
+                    JOptionPane.showMessageDialog(null, exibirDependentes);
                 break;
 
                 case 5:
-                    app.removerDependentes();
+                String removerDependentes = app.removerDependentes();
+                JOptionPane.showMessageDialog(null, removerDependentes);    
                 break;
                 case 0:
                     JOptionPane.showMessageDialog(null, "Fechando programa");
@@ -81,55 +84,58 @@ public class App {
         }
     }
 
-    private void adicionarDependente(){
+    private String adicionarDependente(){
         int cpfDesejado = Integer.parseInt(JOptionPane.showInputDialog("Informe o CPF do funcionário desejado"));
         for (Funcionario cadastrado : listaFuncionarios){
             if(cadastrado.getCPF() == cpfDesejado){
                 String nomeDependente = JOptionPane.showInputDialog("Informe o nome do dependente");
-                String parentesco = JOptionPane.showInputDialog("Informe o parentesco");
-                String nascimento = JOptionPane.showInputDialog("Informe a data de nascimento");
                 boolean duplicata = checaDuplicataDependente(cadastrado.getCPF(), nomeDependente);
                 if (duplicata == false){
+                    String parentesco = JOptionPane.showInputDialog("Informe o parentesco");
+                    String nascimento = JOptionPane.showInputDialog("Informe a data de nascimento");
                     Dependentes dependentes = new Dependentes(nomeDependente, parentesco, nascimento);
                     cadastrado.listaDependentes.add(dependentes);
-                    JOptionPane.showMessageDialog(null, "Dependente registrado com sucesso!");
-                }else if (duplicata == true){
-                    JOptionPane.showMessageDialog(null, "Erro: Dependente já cadastrado");
+                    return "Dependente registrado com sucesso!";
+                }else{
+                    return "Erro: Dependente já cadastrado";
                 }
             }
         }
+        return "ERRO: CPF não cadastrado ou inválido";
     }
 
     private void exibirFuncionarios(){
         String todosFuncionarios = "Todos os funcionários atualmente cadastrados são: ";
         for(Funcionario cadastrado : listaFuncionarios){
-            todosFuncionarios += "\n" + cadastrado.getMatricula() + " - " + cadastrado.getNome() + " com CPF: " + cadastrado.getCPF();
+            todosFuncionarios += "\n"  + cadastrado.getNome() + " com CPF: " + cadastrado.getCPF() + ". Com matrícula número: " + cadastrado.getMatricula();
         }
         JOptionPane.showMessageDialog(null, todosFuncionarios);
     }
 
-    private void exibirDependentes(){
+    private String exibirDependentes(){
         int cpfAConsultar = Integer.parseInt(JOptionPane.showInputDialog("Informe o CPF do funcionário a ser consultado"));
+        String listarDependentesNulo = "Este funcionário não possui dependentes cadastrados";  //Declarada em escopo do método inteiro já que será imutável.
         for(Funcionario cadastrado : listaFuncionarios){
             if (cpfAConsultar == cadastrado.getCPF()){
+                int existeDependente = 0;  //Flag somente declarada caso o CPF seja validado.
                 String listarDependentes = "Todos os dependentes atualmente cadastrados para este funcionário são:";
                 for(Dependentes todosDependentes : cadastrado.listaDependentes){
                     if(todosDependentes != null){
-                        listarDependentes += "\n" + todosDependentes.getNomeDependente() + ". Com parentesco: " + todosDependentes.getParentesco() + ".";
-                        JOptionPane.showMessageDialog(null, listarDependentes);
-                    }
-                    if (todosDependentes == null){
-                        JOptionPane.showMessageDialog(null, "Este funcionário não possui dependentes registrados");
+                            listarDependentes += "\n" + todosDependentes.getNomeDependente() + ". Com parentesco: " + todosDependentes.getParentesco();
+                            existeDependente = 1;
                     }
                 }
-            }else{
-                JOptionPane.showMessageDialog(null, "ERRO: CPF não cadastrado ou inválido");
+                if(existeDependente == 0){  //Uso de uma flag para determinar se a lista estava vazia
+                    return listarDependentesNulo;
+                }
+                return listarDependentes;
             }
-                }
+        }
+        return "CPF inválido";
     }
 
 
-    private void removerDependentes(){
+    private String removerDependentes(){
         int cpfConsultado = Integer.parseInt(JOptionPane.showInputDialog("Informe o CPF do funcionário que deseja remover o dependente"));
         String dependenteARemover = JOptionPane.showInputDialog("Informe o nome do dependente a ser removido");
         for(Funcionario cadastrado : listaFuncionarios){
@@ -139,14 +145,12 @@ public class App {
                     Dependentes dependente = iterador.next();
                     if (dependente.getNomeDependente().equals(dependenteARemover)){
                         iterador.remove();
-                        JOptionPane.showInternalMessageDialog(null, "Dependente de nome " + dependenteARemover + " foi removido(a) com sucesso");
+                        return "Dependente de nome " + dependenteARemover + " foi removido(a) com sucesso";
                     }
                 }
-            }else {
-                JOptionPane.showMessageDialog(null, "CPF não cadastrado ou inválido");
             }
-            
         }
+        return "ERRO: CPF inválido ou funcionário não possui dependentes registrados";
     }
 
     private boolean checaDuplicataFuncionario(int cpf){
@@ -162,7 +166,7 @@ public class App {
         for(Funcionario cadastrado : listaFuncionarios){
             if (cpf == cadastrado.getCPF()){
                 for(Dependentes dependenteCadastrado : cadastrado.listaDependentes){
-                    if(dependenteCadastrado.getNomeDependente() == nomeDependente){
+                    if(dependenteCadastrado.getNomeDependente().equals(nomeDependente)){
                         return true;
                     }
                 }
